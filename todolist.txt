@@ -1,0 +1,20 @@
+[X] Make models for:
+    [X] User
+    [X] Project
+    [X] Issue
+    [X] IssueLabel
+    [X] Comments
+    [X] Reaction
+
+[ ] Make API for accessing:
+    [X] Project
+    [X] Issue List
+    [-] Comments
+        [ ] Reaction List
+
+[ ] Make UI for accessing
+    [ ] Projects
+    [ ] Issue List
+    [ ] Comments
+        [ ] Reaction List
+    
