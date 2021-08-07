@@ -2,7 +2,18 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser 
 
 class User(AbstractUser):
-    pass
+    projects_moderating = models.ManyToManyField('Project', 'moderators', blank=True)
+
+    def is_moderating_project(self, project):
+        return self.projects_moderating.filter(pk=project.pk).first() != None
+
+    def can_modify_issue_labels(self, issue, label):
+        return self.is_moderating_project(issue.project)
+    
+    def can_close_and_open_issues(self, issue, open):
+        return self.is_moderating_project(issue.project)
+    
+
 
 class Project(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)

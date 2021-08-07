@@ -1,9 +1,10 @@
 from rest_framework import viewsets, mixins
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from .serializers import *
 from .models import *
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.decorators import action
 import json
 
@@ -24,7 +25,7 @@ class ProjectView(ActionPermissions, viewsets.GenericViewSet,
                 mixins.CreateModelMixin,
                 mixins.RetrieveModelMixin):
     permission_classes = (IsAuthenticated,)
-    permission_classes_by_action = {'list': [AllowAny]}
+    permission_classes_by_action = {'list': [AllowAny], 'create': [IsAdminUser]}
     
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
@@ -50,7 +51,6 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
 
     @action(detail=False, methods=['post'])
     def set_label(self, request):
-        print(request.body)
         post = json.loads(request.body)
         issue_id = post["issue"]
         label_id = post["label"]
@@ -60,6 +60,9 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
         issue = get_object_or_404(Issue, pk=issue_id)
         issue_label = get_object_or_404(IssueLabel, pk=label_id)
         
+        if not request.user.can_modify_issue_labels(issue, issue_label):
+            raise PermissionDenied()
+
         prefix_of_string = ""
         if issue.labels.filter(pk=label_id).first() == None:
             if on:
