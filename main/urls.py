@@ -7,6 +7,7 @@ router = routers.DefaultRouter()
 router.register(r'projects', views.ProjectView)
 router.register(r'issues', views.ProjectIssuesView)
 router.register(r'comments', views.ProjectIssueCommentsView)
+router.register(r'issue_labels', views.IssueLabelView)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

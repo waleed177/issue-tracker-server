@@ -7,8 +7,14 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', )
 
+class IssueLabelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IssueLabel
+        fields = '__all__'
+
 class IssueSerializer(serializers.ModelSerializer):
     author = UserSerializer(required=False, default=serializers.CurrentUserDefault())
+    labels = IssueLabelSerializer(required=False, many=True)
 
     class Meta:
         model = Issue

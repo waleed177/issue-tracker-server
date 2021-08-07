@@ -10,6 +10,7 @@ class Project(models.Model):
 
 class IssueLabel(models.Model):
     name = models.CharField(max_length=64)
+    color = models.CharField(max_length=7)
 
 class Issue(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
