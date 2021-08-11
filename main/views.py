@@ -25,7 +25,11 @@ class ProjectView(ActionPermissions, viewsets.GenericViewSet,
                 mixins.CreateModelMixin,
                 mixins.RetrieveModelMixin):
     permission_classes = (IsAuthenticated,)
-    permission_classes_by_action = {'list': [AllowAny], 'create': [IsAdminUser]}
+    permission_classes_by_action = {
+        'create': [IsAdminUser],     
+        'retrieve': [AllowAny],
+        'list': [AllowAny]
+    }
     
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
@@ -35,7 +39,12 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
                         mixins.RetrieveModelMixin, 
                         mixins.CreateModelMixin):
     permission_classes = (IsAuthenticated,)
-    permission_classes_by_action = {'list': [AllowAny]}
+
+    permission_classes_by_action = {
+        'create': [AllowAny],       
+        'retrieve': [AllowAny],
+        'list': [AllowAny]
+    }
 
     queryset = Issue.objects.all()
 
@@ -83,12 +92,37 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
             "success": True
         })
 
+    #TODO MAKE PERMISSIONS NOT ALLOW USERS TO WRITE ON CLOSED ISSUE
+    #TODO Display a message that the issue is closed
+    @action(detail=True, methods=['post'])
+    def close_or_open(self, request, pk):
+        post = json.loads(request.body)
+        issue_id = pk
+        open_issue = post["open"]
+
+        issue : Issue
+        issue = get_object_or_404(Issue, pk=issue_id)
+
+        if not request.user.can_close_and_open_issues(issue, open_issue):
+            raise PermissionDenied()
+        
+        issue.is_open = open_issue
+
+        #if issue.is_ope
+
+        return Response({
+            "success": True
+        })
+
 class ProjectIssueCommentsView(ActionPermissions, viewsets.GenericViewSet,
                             mixins.ListModelMixin,
                             mixins.CreateModelMixin):
     permission_classes = (IsAuthenticated,)
-    permission_classes_by_action = {'list': [AllowAny]}
-
+    permission_classes_by_action = {
+        'create': [AllowAny],       
+        'retrieve': [AllowAny],
+        'list': [AllowAny]
+    }
     queryset = Comment.objects.all()
     def get_queryset(self):
         pk = self.request.GET["issue"]

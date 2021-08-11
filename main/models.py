@@ -13,8 +13,6 @@ class User(AbstractUser):
     def can_close_and_open_issues(self, issue, open):
         return self.is_moderating_project(issue.project)
     
-
-
 class Project(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -25,14 +23,17 @@ class IssueLabel(models.Model):
     color = models.CharField(max_length=7)
 
 class Issue(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    guest_name = models.CharField(max_length=64, blank=True, null=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="issues")
     title = models.CharField(max_length=200)
     labels = models.ManyToManyField(IssueLabel, related_name="issues", blank=True)
     creation_date = models.DateTimeField(auto_now=True)
+    is_open = models.BooleanField(default=True)
 
 class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    guest_name = models.CharField(max_length=64, blank=True, null=True)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name="comments")
     body = models.TextField()
     creation_date = models.DateTimeField(auto_now=True)
