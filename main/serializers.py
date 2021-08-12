@@ -57,11 +57,17 @@ class IssueSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     #issues = IssueSerializer(many = True, required=False)
     author = UserSerializer(required=False, default=CurrentUserDefault())
+    is_project_admin = serializers.SerializerMethodField()
     
     class Meta:
         model = Project
         fields = '__all__'
         read_only_fields = ('author', 'creation_date')
+
+    def get_is_project_admin(self, instance):
+        request = self.context.get('request')
+        user = request.user
+        return user.is_authenticated and user.is_moderating_project(instance)
 
 class CommentSerializer(serializers.ModelSerializer):
     author = UserSerializer(required=False, default=CurrentUserDefault())

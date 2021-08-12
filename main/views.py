@@ -63,6 +63,9 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
                     res = res.filter(publicity = Issue.PUBLICITY_PUBLIC)
         else:
             res = res.filter(publicity = Issue.PUBLICITY_PUBLIC)
+        
+        if "publicity" in self.request.GET:
+            res = res.filter(publicity = int(self.request.GET["publicity"]))
         return res
         
     
