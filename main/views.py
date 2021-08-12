@@ -49,12 +49,22 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
     queryset = Issue.objects.all()
 
     def get_queryset(self):
+        res = super().get_queryset()
         if "project" in self.request.GET:
             pk = self.request.GET["project"]
             project = get_object_or_404(Project, pk=pk)
-            return super().get_queryset().filter(project=project)
+            res = res.filter(project=project)
+        
+        if self.request.user.is_authenticated:
+            if "project" in self.request.GET:
+                pk = self.request.GET["project"]
+                project = get_object_or_404(Project, pk=pk)
+                if not self.request.user.is_moderating_project(project):
+                    res = res.filter(publicity = Issue.PUBLICITY_PUBLIC)
         else:
-            return super().get_queryset()
+            res = res.filter(publicity = Issue.PUBLICITY_PUBLIC)
+        return res
+        
     
     serializer_class = IssueSerializer
 
@@ -113,6 +123,26 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
         return Response({
             "success": True
         })
+    
+    @action(detail=True, methods=['post'])
+    def toggle_publicity(self, request, pk):
+        issue_id = pk
+
+        issue : Issue
+        issue = get_object_or_404(Issue, pk=issue_id)
+
+        if not request.user.can_modify_publicity(issue):
+            raise PermissionDenied()
+        
+        if issue.publicity == Issue.PUBLICITY_PUBLIC:
+            issue.publicity = Issue.PUBLICITY_PRIVATE
+        else:
+            issue.publicity = Issue.PUBLICITY_PUBLIC
+        
+        issue.save()
+
+        return Response(IssueSerializer(issue, context={"request": request}).data)
+
 
 class ProjectIssueCommentsView(ActionPermissions, viewsets.GenericViewSet,
                             mixins.ListModelMixin,

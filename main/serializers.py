@@ -15,6 +15,20 @@ class CurrentUserDefault:
     def __repr__(self):
         return '%s()' % self.__class__.__name__
 
+class CanModifyPublicity:
+    requires_context = True
+
+    def __call__(self, serializer_field):
+        res = serializer_field.context['request'].user
+        if res.is_authenticated:
+            return res.can_modify_publicity()
+        else:
+            return False
+
+    def __repr__(self):
+        return '%s()' % self.__class__.__name__
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -28,11 +42,17 @@ class IssueLabelSerializer(serializers.ModelSerializer):
 class IssueSerializer(serializers.ModelSerializer):
     author = UserSerializer(required=False, default=CurrentUserDefault())
     labels = IssueLabelSerializer(required=False, many=True)
-
+    can_modify_publicity = serializers.SerializerMethodField()
+    
     class Meta:
         model = Issue
         fields = '__all__'
-        read_only_fields = ('author', 'creation_date', 'is_open')
+        read_only_fields = ('author', 'creation_date', 'is_open', 'publicity', 'can_modify_publicity')
+
+    def get_can_modify_publicity(self, instance):
+        request = self.context.get('request')
+        user = request.user
+        return user.is_authenticated and user.can_modify_publicity(instance)
 
 class ProjectSerializer(serializers.ModelSerializer):
     #issues = IssueSerializer(many = True, required=False)
