@@ -26,6 +26,7 @@ from .models import *
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.decorators import action
+from . import permissions
 import json
 
 class ActionPermissions:
@@ -149,7 +150,8 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
             raise PermissionDenied()
         
         issue.is_open = open_issue
-
+        issue.save()
+        
         Comment.objects.create(
             author = request.user,
             issue = issue,
@@ -160,9 +162,8 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
             is_status_change = True
         )
 
-        return Response({
-            "success": True
-        })
+        return Response(IssueSerializer(issue, context={"request": request}).data)
+
     
     @action(detail=True, methods=['post'])
     def toggle_publicity(self, request, pk):
@@ -189,7 +190,7 @@ class ProjectIssueCommentsView(ActionPermissions, viewsets.GenericViewSet,
                             mixins.CreateModelMixin):
     permission_classes = (IsAuthenticated,)
     permission_classes_by_action = {
-        'create': [AllowAny],       
+        'create': [permissions.CanComment],       
         'retrieve': [AllowAny],
         'list': [AllowAny]
     }
