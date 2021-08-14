@@ -191,8 +191,8 @@ class ProjectIssueCommentsView(ActionPermissions, viewsets.GenericViewSet,
     permission_classes = (IsAuthenticated,)
     permission_classes_by_action = {
         'create': [permissions.CanComment],       
-        'retrieve': [AllowAny],
-        'list': [AllowAny]
+        'retrieve': [permissions.CanComment],
+        'list': [permissions.CanReadComments]
     }
     queryset = Comment.objects.all()
     def get_queryset(self):

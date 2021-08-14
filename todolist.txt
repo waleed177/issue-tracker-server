@@ -19,16 +19,17 @@
         [ ] Reaction List
 
 
-[ ] Close Issue
+[X] Close Issue
+    [X] No commenting on closed issues.
+[X] Make Added Label not a comment.
+[X] Admin's Name Displayed Differently.
+[X?] Make comments only readable for public issues or if u have access.
 [ ] Hide Close Issue for guests
 [ ] Hide Label Editor for guests
-[ ] Make Added Label not a comment.
 [ ] Collapse Consecutive Added labels
 [ ] Filtering via Labels
 [ ] Pagination
 [ ] Search
-[ ] Admin's Name Coloured Differently.
-[ ] Make comments only readable for public issues or if u have access.
 
 ----
 [ ] Create Project
