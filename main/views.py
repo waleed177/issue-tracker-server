@@ -24,6 +24,7 @@ from rest_framework.exceptions import PermissionDenied
 from .serializers import *
 from .models import *
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.decorators import action
 from . import permissions
@@ -87,6 +88,17 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
         
         if "publicity" in self.request.GET:
             res = res.filter(publicity = int(self.request.GET["publicity"]))
+        
+        if "labels" in self.request.GET:
+            labels_str = self.request.GET["labels"]
+            if labels_str != "":
+                labels = labels_str.split("$")
+                query = Q()
+                for label in labels:
+                    query = query | Q(labels__pk = int(label))
+                res = res.filter(query)
+            else:
+                res = Issue.objects.none()
         return res
         
     
