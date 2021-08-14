@@ -74,3 +74,4 @@ class Comment(models.Model):
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name="comments")
     body = models.TextField()
     creation_date = models.DateTimeField(auto_now=True)
+    is_status_change = models.BooleanField(default=False)

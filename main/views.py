@@ -105,21 +105,30 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
         if not request.user.can_modify_issue_labels(issue, issue_label):
             raise PermissionDenied()
 
-        prefix_of_string = ""
+        action = ""
         if issue.labels.filter(pk=label_id).first() == None:
             if on:
                 issue.labels.add(issue_label)
-                prefix_of_string = "Added label: "
+                action = "added"
         else:
             if not on:
                 issue.labels.remove(issue_label)
-                prefix_of_string = "Removed label: "
+                action = "removed"
 
-        Comment.objects.create(
-            author = request.user,
-            issue = issue,
-            body = prefix_of_string + issue_label.name
-        )
+        if action != "":
+            Comment.objects.create(
+                author = request.user,
+                issue = issue,
+                body = json.dumps({
+                    "type": "label",
+                    "action": action,
+                    "label": {
+                        "name": issue_label.name,
+                        "color": issue_label.color
+                    }
+                }),
+                is_status_change = True
+            )
         
         return Response({
             "success": True
@@ -141,7 +150,15 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
         
         issue.is_open = open_issue
 
-        #if issue.is_ope
+        Comment.objects.create(
+            author = request.user,
+            issue = issue,
+            body = json.dumps({
+                "type": "issue",
+                "action": "open" if issue.is_open else "close"
+            }),
+            is_status_change = True
+        )
 
         return Response({
             "success": True
