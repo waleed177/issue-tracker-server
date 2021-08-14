@@ -99,6 +99,12 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
                 res = res.filter(query)
             else:
                 res = Issue.objects.none()
+        
+        if "query" in self.request.GET:
+            query = self.request.GET["query"]
+            res = res.filter(
+                Q(title__contains = query)
+            )
         return res
         
     

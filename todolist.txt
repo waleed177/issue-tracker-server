@@ -25,11 +25,11 @@
 [X] Admin's Name Displayed Differently.
 [X?] Make comments only readable for public issues or if u have access.
 [X] Filtering via Labels
+[X?] Search
 [ ] Hide Close Issue for guests
 [ ] Hide Label Editor for guests
 [ ] Collapse Consecutive Added labels
 [ ] Pagination
-[ ] Search
 
 ----
 [ ] Create Project
