@@ -27,8 +27,13 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+from django.db.models import Count
 from . import permissions
 import json
+
+class MyPageNumberPagination(PageNumberPagination):
+    page_size = 5
 
 class ActionPermissions:
      def get_permissions(self):
@@ -55,6 +60,8 @@ class ProjectView(ActionPermissions, viewsets.GenericViewSet,
     
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+    pagination_class = MyPageNumberPagination
+
 
 class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet, 
                         mixins.ListModelMixin, 
@@ -70,6 +77,8 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
 
     queryset = Issue.objects.all()
 
+    pagination_class = MyPageNumberPagination
+    
     def get_queryset(self):
         res = super().get_queryset()
         if "project" in self.request.GET:
@@ -96,10 +105,17 @@ class ProjectIssuesView(ActionPermissions, viewsets.GenericViewSet,
                 query = Q()
                 for label in labels:
                     query = query | Q(labels__pk = int(label))
-                res = res.filter(query)
+                
+                if "include_unlabelled" in self.request.GET:
+                    query = query | Q(label_count = 0)
+                res = res.annotate(label_count = Count('labels')).filter(query)
             else:
-                res = Issue.objects.none()
+                if "include_unlabelled" in self.request.GET:
+                    res = res.annotate(label_count = Count('labels')).filter(label_count = 0)
+                else:
+                    res = Issue.objects.none()
         
+
         if "query" in self.request.GET:
             query = self.request.GET["query"]
             res = res.filter(

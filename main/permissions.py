@@ -29,6 +29,7 @@ class CanComment(permissions.BasePermission):
         issue = models.Issue.objects.get(pk=post["issue"])
         return issue.is_open and (
             issue.publicity == issue.PUBLICITY_PUBLIC 
+            or not issue.comments.all()
             or request.user.is_moderating_project(issue.project)
         )
 

@@ -30,6 +30,6 @@
 [ ] Hide Label Editor for guests
 [ ] Collapse Consecutive Added labels
 [ ] Pagination
-
+[ ] Add filter to find unlabeled issues.
 ----
 [ ] Create Project
