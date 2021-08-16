@@ -2,7 +2,7 @@
 This is an issue tracker
 
 # Note
-This is a work in progress, do not use in production yet.
+This is a work in progress, not reccomended for use in production yet.
 
 # Installation Instructions
 Install Python (Tested with Python 3.9.6, pip 21.0.1)
